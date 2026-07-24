@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="gate-version" content="3.5">
+  <title>Gate Log — 11-Gate Border Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    window.__libFailed = {};
+    window.__libFail = function(name){ window.__libFailed[name] = true; };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" onerror="window.__libFail && window.__libFail('jspdf')"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" onerror="window.__libFail && window.__libFail('html2canvas')"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" onerror="window.__libFail && window.__libFail('jszip')"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js" onerror="window.__libFail && window.__libFail('mammoth')"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== GATE NAVIGATION BAR ==================== -->
+  <nav class="gate-nav" id="gateSidebar" aria-label="Gate selection">
+    <div class="gate-nav-header">
+      <span class="gate-nav-linked" id="btnTestAlert">Linked: &nbsp;MainPC</span>
+      <span class="gate-nav-title">zzzzzzates v.</span>
+      <span id="syncIndicator" class="sync-indicator" title="Telegram sync status"></span>
+    </div>
+
+    <div class="gate-reveal" id="gateReveal">
+      <div class="gate-box">
+        <div class="gate-dots" id="gateDots">
+          <div class="gate-row" data-row="1"></div>
+          <div class="gate-row" data-row="2"></div>
+          <div class="gate-row" data-row="3"></div>
+        </div>
+      </div>
+        <div class="gate-actions-box">
+          <div class="gate-actions-row">
+            <button class="action-btn check gate-check" id="btnCheck" type="button">Check</button>
+            <button class="action-btn sync" id="btnSync" type="button">Sync</button>
+            <button class="action-btn" id="btnToggleSettings" aria-label="Settings" style="padding: var(--space-2) var(--space-3);">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </button>
+          </div>
+          <p class="gate-hint" id="gateHint" hidden>Long press gate to temp pass.</p>
+        </div>
+    </div>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="app-main">
+    <div class="app-container" id="report-root">
+
+      <!-- Library warning banner -->
+      <div class="lib-warning" id="libWarning" role="alert"></div>
+
+      <!-- Status message -->
+      <div class="status-bar">
+        <span class="status-msg" id="statusMsg" aria-live="polite"></span>
+      </div>
+
+      <!-- ==================== COUNTER PANEL ==================== -->
+      <section class="panel counter-panel">
+        <div class="gender-box">
+          <div class="toolbar-group export-group counter-type-group">
+            <button class="nat-btn na active" id="btnNa" type="button">Na</button>
+            <button class="nat-btn thai" id="btnThai" type="button">Thai</button>
+
+            <div class="nation-backdrop" id="nationBackdrop" hidden></div>
+            <div class="nation-list" id="nationList" hidden>
+              <input class="nation-search" id="nationSearch" type="text" placeholder="Search..." autocomplete="off">
+            </div>
+          </div>
+
+          <div class="direction-toggle">
+            <button class="dir-btn in active" id="btnDirIn" type="button">IN</button>
+            <button class="dir-btn out" id="btnDirOut" type="button">OUT</button>
+          </div>
+
+          <div class="gender-row">
+            <div class="gender-side male">
+              <span class="counter-label">Person</span>
+              <div class="counter-controls">
+                <button class="counter-btn up" id="box1Up" type="button" aria-label="Increase person count">+</button>
+                <div class="counter-value" id="box1Val">0</div>
+                <button class="counter-btn down" id="box1Down" type="button" aria-label="Decrease person count">−</button>
+              </div>
+            </div>
+
+            <div class="gender-divider"></div>
+
+            <div class="gender-side female">
+              <span class="counter-label">Female</span>
+              <div class="counter-controls">
+                <button class="counter-btn up" id="box2Up" type="button" aria-label="Increase female count">+</button>
+                <div class="counter-value" id="box2Val">0</div>
+                <button class="counter-btn down" id="box2Down" type="button" aria-label="Decrease female count">−</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary add-btn" id="btnAdd" type="button">Add Entry</button>
+      </section>
+
+      <!-- ==================== TOOLBAR ==================== -->
+      <section class="toolbar">
+        <div class="toolbar-group export-group">
+          <span class="toolbar-label">Export</span>
+          <button class="toolbar-btn primary" id="btnExportPdf" style="display:none">PDF</button>
+          <button class="toolbar-btn primary" id="btnExportWord" style="display:none">Thai_Word</button>
+          <button class="toolbar-btn thai" id="btnExportNAWord">NA,Thai,TWG</button>
+          <button class="toolbar-btn primary" id="btnExportNAPdf" style="display:none">NA_PDF</button>
+        </div>
+
+        <div class="toolbar-group" style="display:none">
+          <span class="toolbar-label">Telegram</span>
+          <button class="toolbar-btn warn" id="btnSendImg">Send Image</button>
+          <button class="toolbar-btn warn" id="btnSendPdf">Send PDF</button>
+          <button class="toolbar-btn warn" id="btnTelegramWord">Send Word</button>
+        </div>
+
+        <div class="toolbar-group export-group">
+          <span class="toolbar-label">Actions</span>
+          <button class="toolbar-btn ghost" id="btnUndo">Undo</button>
+          <button class="toolbar-btn danger" id="btnReset">Reset</button>
+        </div>
+      </section>
+
+      <!-- ==================== SETTINGS ==================== -->
+      <section class="settings" id="settingsPanel" aria-hidden="true">
+        <div class="settings-card">
+          <header class="settings-header">
+            <h3>Telegram Bot Configuration</h3>
+            <p class="settings-desc">Configure your Telegram bot for automatic photo verification and report delivery.</p>
+          </header>
+
+          <div class="settings-body">
+            <div class="field">
+              <label class="field-label" for="tgToken">Bot Token</label>
+              <input class="field-input" type="password" id="tgToken" placeholder="123456:ABC-DEF..." autocomplete="off">
+            </div>
+            <div class="field">
+              <label class="field-label" for="tgChatId">Chat ID</label>
+              <input class="field-input" type="text" id="tgChatId" placeholder="-1001234567890" autocomplete="off">
+            </div>
+            <div class="field">
+              <label class="field-label" for="apiBase">Proxy URL <span class="optional">(optional, for mobile/CORS)</span></label>
+              <input class="field-input" type="text" id="apiBase" placeholder="https://your-proxy.workers.dev" autocomplete="off">
+              <span class="field-hint">Leave empty for direct mode. Set this to use on mobile browsers.</span>
+            </div>
+            <div class="field">
+              <label class="field-label" for="tgAlertChatId">Alert Chat ID <span class="optional">(private)</span></label>
+              <input class="field-input" type="text" id="tgAlertChatId" placeholder="your private chat id" autocomplete="off">
+              <span class="field-hint">Private chat where the "all gates verified" alert is sent. Leave as-is to use the default.</span>
+            </div>
+          </div>
+
+          <footer class="settings-footer">
+            <button class="btn-primary save-btn" id="btnSaveSettings">Save Configuration</button>
+          </footer>
+        </div>
+      </section>
+
+      <!-- ==================== DEBUG PANEL ==================== -->
+      <details class="debug-panel" id="debugPanel">
+        <summary class="debug-summary">Sync Debug Info</summary>
+        <div class="debug-content">
+          <div class="debug-row">
+            <span class="debug-label">Last Sync:</span>
+            <span class="debug-value" id="debugLastSync">Never</span>
+          </div>
+          <div class="debug-row">
+            <span class="debug-label">Photo Counts:</span>
+            <span class="debug-value" id="debugPhotoCounts">-</span>
+          </div>
+          <div class="debug-row">
+            <span class="debug-label">Verified Gates:</span>
+            <span class="debug-value" id="debugVerified">-</span>
+          </div>
+          <div class="debug-row">
+            <span class="debug-label">Events:</span>
+            <span class="debug-value debug-events" id="debugEvents">-</span>
+          </div>
+          <div class="debug-row">
+            <span class="debug-label">Storage Mode:</span>
+            <span class="debug-value" id="debugStorageMode">-</span>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </main>
+
+  <script src="thai-doc.js"></script>
+  <script src="na-doc.js"></script>
+  <script src="templates.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
