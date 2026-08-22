@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Deploy/backend files — only index.html, app.js, style.css should be committed
+package.json
+package-lock.json
+deploy-git.js
+server.js
+proxy-server.js
+telegram-proxy.js
+telegram-worker.js
+api/
+workers/
+vercel.json
+kilo.json
+PROXY_SETUP.md
+Telegram_info.txt
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
